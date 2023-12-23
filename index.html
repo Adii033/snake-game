@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Snake Game</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    canvas {
+      border: 1px solid white;
+    }
+
+    .button-container {
+      margin-top: 20px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .button {
+      padding: 58px;
+      font-size: 30px;
+      cursor: pointer;
+      border: none;
+      border-radius: 50%;
+      background-color: #2ecc71;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width:70px;
+      height: 70px;
+    }
+
+    .button:hover {
+      background-color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <canvas width="500" height="500" id="game"></canvas>
+  <div class="button-container">
+    <button class="button" id="startButton">Start</button>
+    <button class="button" id="pauseButton">Pause</button>
+    <button class="button" id="resumeButton">  Resume  </button>
+  </div>
+  <div class="button-container">
+    <button class="button" id="leftButton">←</button>
+	<button class="button" id="rightButton">→</button>
+    <button class="button" id="upButton">↑</button>
+    <button class="button" id="downButton">↓</button>
+  </div>
+
+<script>
+  var canvas = document.getElementById('game');
+  var context = canvas.getContext('2d');
+
+  var grid = 20;
+  var count = 0;
+
+  var snake = {
+    x: 160,
+    y: 160,
+    dx: grid,
+    dy: 0,
+    cells: [], 
+    maxCells: 5
+  };
+  var apple = {
+    x: 320,
+    y: 320,
+  };
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  function loop() {
+    requestAnimationFrame(loop);
+
+    if (++count < 25) {
+      return;
+    }
+
+    count = 0;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    snake.x += snake.dx;
+    snake.y += snake.dy;
+
+    if (snake.x < 0) {
+      snake.x = canvas.width - grid;
+    } else if (snake.x >= canvas.width) {
+      snake.x = 0;
+    }
+
+    if (snake.y < 0) {
+      snake.y = canvas.height - grid;
+    } else if (snake.y >= canvas.height) {
+      snake.y = 0;
+    }
+
+    snake.cells.unshift({ x: snake.x, y: snake.y });
+
+    if (snake.cells.length > snake.maxCells) {
+      snake.cells.pop();
+    }
+
+    context.fillStyle = 'red';
+    context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+
+    context.fillStyle = 'green';
+    snake.cells.forEach(function (cell, index) {
+      context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+
+      if (cell.x === apple.x && cell.y === apple.y) {
+        snake.maxCells++;
+        apple.x = getRandomInt(0, 25) * grid;
+        apple.y = getRandomInt(0, 25) * grid;
+      }
+
+      for (var i = index + 1; i < snake.cells.length; i++) {
+        if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+          snake.x = 160;
+          snake.y = 160;
+          snake.cells = [];
+          snake.maxCells = 4;
+          snake.dx = grid;
+          snake.dy = 0;
+
+          apple.x = getRandomInt(0, 25) * grid;
+          apple.y = getRandomInt(0, 25) * grid;
+        }
+      }
+    });
+  }
+
+  document.getElementById('startButton').addEventListener('click', function () {
+    if (!running) {
+      running = true;
+      requestAnimationFrame(loop);
+    }
+  });
+
+  document.getElementById('pauseButton').addEventListener('click', function () {
+    running = false;
+  });
+
+  document.getElementById('resumeButton').addEventListener('click', function () {
+    if (!running) {
+      running = true;
+      requestAnimationFrame(loop);
+    }
+  });
+
+  document.getElementById('leftButton').addEventListener('click', function () {
+    if (snake.dx !== grid) {
+      snake.dx = -grid;
+      snake.dy = 0;
+    }
+  });
+
+  document.getElementById('upButton').addEventListener('click', function () {
+    if (snake.dy !== grid) {
+      snake.dy = -grid;
+      snake.dx = 0;
+    }
+  });
+
+  document.getElementById('rightButton').addEventListener('click', function () {
+    if (snake.dx !== -grid) {
+      snake.dx = grid;
+      snake.dy = 0;
+    }
+  });
+
+  document.getElementById('downButton').addEventListener('click', function () {
+    if (snake.dy !== -grid) {
+      snake.dy = grid;
+      snake.dx = 0;
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.which === 37 && snake.dx !== grid) {
+      snake.dx = -grid;
+      snake.dy = 0;
+    } else if (e.which === 38 && snake.dy !== grid) {
+      snake.dy = -grid;
+      snake.dx = 0;
+    } else if (e.which === 39 && snake.dx !== -grid) {
+      snake.dx = grid;
+      snake.dy = 0;
+    } else if (e.which === 40 && snake.dy !== -grid) {
+      snake.dy = grid;
+      snake.dx = 0;
+    }
+  });
+
+  var running = false;
+</script>
+</body>
+</html>
